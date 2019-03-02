@@ -138,7 +138,18 @@ ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id)
         
         print(paste0('Parsam clanak: ', clanak_id))
             
-        novi_komentari <- ProcitajSveKomentareClanka(remDr, clanak_id, savjetovanje_id)
+        # novi_komentari <- ProcitajSveKomentareClanka(remDr, clanak_id, savjetovanje_id)
+        novi_komentari <- tryCatch({
+                ProcitajSveKomentareClanka(remDr, clanak_id, savjetovanje_id)
+            }, warning = function(warning_condition) {
+                # warning-handler-code
+            }, error = function(error_condition) {
+                sink('errors.txt', append = TRUE)
+                cat(paste('Savjetovanje:', savjetovanje_id))
+                sink()
+            }, finally={
+                # cleanup-code
+            })
         
         if (!is.null(novi_komentari)) {
             svi_komentari <- rbind(svi_komentari, novi_komentari)
