@@ -5,7 +5,8 @@ library(RSelenium)
 
 # pomocne funkcije
 
-glavna <- function(obrada) {
+# ovo iterira po headerima i skrejpa jednu po jednu raspravu
+Orkestracija <- function(obrada) {
     tryCatch({
         citava_rasprava <- data.frame()
         
@@ -19,7 +20,7 @@ glavna <- function(obrada) {
             
             
             
-            citava_rasprava <- rbind(citava_rasprava,ProcitajRaspravuPoClancima(remDr, url, h$ID))
+            citava_rasprava <- rbind(citava_rasprava, ProcitajRaspravuPoClancima(remDr, url, h$ID))
             
             obrada[i,"Scraped"] <- TRUE
         }
@@ -57,6 +58,9 @@ ProcitajTablicuHeadera <- function(stranica){
     rows <- rows %>%
         mutate_all(as.character)
     
+    # print max RowID
+    print(max(rows$ID))
+    
     # vrati tablicu kao data.frame
     rows
 }
@@ -81,6 +85,14 @@ ProcitajHeadereRasprava <- function() {
         # procitaj podatke sa stranice
         sve_rasprave <- rbind(sve_rasprave, ProcitajTablicuHeadera(stranica))
         
+        # uvjet zaustavljanja pri cupanju delte
+        if (as.integer(min(sve_rasprave$ID)) <= 6758) {
+            
+            sve_rasprave <- sve_rasprave %>% filter(as.integer(ID) > 6758)
+            
+            break;
+        }
+        
         # odmori pet sekundi
         Sys.sleep(5)
         
@@ -103,9 +115,9 @@ ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id)
     # navigate page
     remDr$navigate(savjetovanje_url)
     # pricekaj malo da se loada
-    Sys.sleep(1)
+    Sys.sleep(3)
     # ulovi sve buttone koji vode na komentirane clanke
-    badges <- remDr$findElements(using = "class", value = "badge")
+    badges <- remDr$findElements(using = "css", value = ".title")
     
     svi_komentari <- data.frame()
     
@@ -114,22 +126,24 @@ ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id)
         
         b <- badges[[i]]
         
-        if(!is.na(as.numeric(unlist(b$getElementText())))){
-            # klikni na badge
-            b$clickElement()
-            # pricekaj malo da se loada
-            Sys.sleep(1)
-            # procitaj ID clanka
-            clanak_id <- unlist(remDr$findElement(using = "css", value = "#content-main .selected")$getElementAttribute(attrName = "id"))
+        print(paste0('i: ', i, ' badge text: ', b$getElementText()))
+
+        # if(!is.na(as.numeric(unlist(b$getElementText())))){
+        # klikni na badge
+        b$clickElement()
+        # pricekaj malo da se loada
+        Sys.sleep(1)
+        # procitaj ID clanka
+        clanak_id <- unlist(remDr$findElement(using = "css", value = "#content-main .selected")$getElementAttribute(attrName = "id"))
+        
+        print(paste0('Parsam clanak: ', clanak_id))
             
-            # if(clanak_id == "213614"){
-            #     print("tu sam")
-            #     print("tu sam sada")
-            # }
-                
-            
-            svi_komentari <- rbind(svi_komentari, ProcitajSveKomentareClanka(remDr, clanak_id, savjetovanje_id))
+        novi_komentari <- ProcitajSveKomentareClanka(remDr, clanak_id, savjetovanje_id)
+        
+        if (!is.null(novi_komentari)) {
+            svi_komentari <- rbind(svi_komentari, novi_komentari)
         }
+        # }
     }
     if( nrow(svi_komentari) > 0 ) {
         svi_komentari$savjetovanje_id <- savjetovanje_id
@@ -141,7 +155,6 @@ ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id)
 }
 
 ProcitajSveKomentareClanka <- function(remDr, clanak_id, savjetovanje_id) {
-    
     # procitaj koliko je stranica
     all_pagination <- remDr$findElement('class', 'red-pagination')
     pagination_divs <- all_pagination$findChildElements(using = 'tag name', value = "div")
@@ -150,7 +163,7 @@ ProcitajSveKomentareClanka <- function(remDr, clanak_id, savjetovanje_id) {
     # preventivno odi na prvu
     pages[[1]]$clickElement()
     # pricekaj malo da se loada
-    Sys.sleep(1)
+    Sys.sleep(2)
     # napravi cisti data.frame
     svi_komentari <- data.frame()
     
@@ -159,6 +172,9 @@ ProcitajSveKomentareClanka <- function(remDr, clanak_id, savjetovanje_id) {
         potencijalni_komentari <- remDr$findElements(using = "class", value = "comment-content")
         # pronadi stvarne komentare medu njima
         komentari_stranice <- potencijalni_komentari %>% ldply(ProcitajKomentar)
+        # ako si procitao prazan data frame izadi iz funkcije i vrati null
+        if(nrow(komentari_stranice) == 0)
+            return(NULL)
         # dodaj kolonu clanak_id
         komentari_stranice$clanak_id <- clanak_id
         

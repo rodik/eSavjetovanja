@@ -1,5 +1,5 @@
 
-hederi <- ProcitajHeadereRasprava()
+hederi_delta <- ProcitajHeadereRasprava()
 
 
 con<-file('headeri.csv',encoding="WINDOWS-1252")
