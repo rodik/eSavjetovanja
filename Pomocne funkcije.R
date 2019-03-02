@@ -65,7 +65,6 @@ ProcitajTablicuHeadera <- function(stranica){
     rows
 }
 
-
 ProcitajHeadereRasprava <- function() {
     
     # priprema
@@ -109,6 +108,42 @@ ProcitajHeadereRasprava <- function() {
         
     }
     sve_rasprave
+}
+
+IzvuciIDeveClanakaRasprave <- function(savjetovanje_url, savjetovanje_id) {
+    # povuci html
+    rasprava_html <- read_html(savjetovanje_url)
+    # procitaj sve IDeve clanaka
+    clanak_ids <- rasprava_html %>% 
+        html_nodes(css = '.block-commentable') %>%
+        html_attr("id")
+    # pretvori u tablicu
+    clanak_ids <- clanak_ids %>% 
+        as_tibble() %>%
+        select(clanak_id = value)
+    # dodaj id pripadajuce rasprave
+    clanak_ids$savjetovanje_id <- savjetovanje_id
+    
+    return(clanak_ids)
+}
+
+ProcitajSveClankeSvihRasprava <- function(all_headers) {
+    # iteriraj po headerima
+    svi_clanci <- tibble()
+    base_url <- "https://esavjetovanja.gov.hr"
+    for (i in 1:nrow(all_headers)) {
+        
+        r <- all_headers[i,]
+        url <- paste0(base_url, as.character(r$SavjetovanjeURL))
+        
+        new_clanci_ids <- IzvuciIDeveClanakaRasprave(url, r$ID)
+        
+        if (!is.null(new_clanci_ids) & nrow(new_clanci_ids) > 0) {
+            svi_clanci <- rbind(svi_clanci, new_clanci_ids)
+        }
+        print(i)
+    }
+    return(svi_clanci)
 }
 
 ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id) {
@@ -202,7 +237,6 @@ ProcitajSveKomentareClanka <- function(remDr, clanak_id, savjetovanje_id) {
     svi_komentari
 }
 
-
 ProcitajKomentar <- function(el){
     tryCatch({
         if(unlist(el$getElementAttribute(attrName = "class")) == 'comment-content') {
@@ -224,7 +258,6 @@ ProcitajKomentar <- function(el){
         error(e)
     })
 }
-
 
 IsPagination <- function(el){
     grepl('btnp btnp-num ng-scope ng-binding', unlist(el$getElementAttribute(attrName = "class"))) 
