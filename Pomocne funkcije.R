@@ -3,6 +3,7 @@ library(curl)
 library(httr)
 library(plyr)
 library(dplyr)
+library(jsonlite)
 library(RSelenium)
 
 # pomocne funkcije
