@@ -42,6 +42,8 @@ eSavjetovanja_Get_Comments_from_API <- function(clanak_id, cookie, token, elemen
             table.content$Response.ResponseTypeId <- as.integer(NA)
             table.content$Response.IsStale <- as.logical(NA)
         }
+        # makni nestanu kolonu ako postoji
+        table.content$Response <- NULL
     }
     
     # return
