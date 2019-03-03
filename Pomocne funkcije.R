@@ -1,4 +1,6 @@
 library(rvest)
+library(curl)
+library(httr)
 library(plyr)
 library(dplyr)
 library(RSelenium)
@@ -85,12 +87,12 @@ ProcitajHeadereRasprava <- function() {
         sve_rasprave <- rbind(sve_rasprave, ProcitajTablicuHeadera(stranica))
         
         # uvjet zaustavljanja pri cupanju delte
-        if (as.integer(min(sve_rasprave$ID)) <= 6758) {
-            
-            sve_rasprave <- sve_rasprave %>% filter(as.integer(ID) > 6758)
-            
-            break;
-        }
+        # if (as.integer(min(sve_rasprave$ID)) <= 6758) {
+        #     
+        #     sve_rasprave <- sve_rasprave %>% filter(as.integer(ID) > 6758)
+        #     
+        #     break;
+        # }
         
         # odmori pet sekundi
         Sys.sleep(5)
@@ -142,9 +144,12 @@ ProcitajSveClankeSvihRasprava <- function(all_headers) {
             svi_clanci <- rbind(svi_clanci, new_clanci_ids)
         }
         print(i)
+        Sys.sleep(1)
     }
     return(svi_clanci)
 }
+
+
 
 ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id) {
     # navigate page
