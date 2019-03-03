@@ -94,8 +94,21 @@ Get_all_comments_for_all_rasprave <- function(clanak_ids) {
     for (i in 1:nrow(clanak_ids)) {
         # uzmi clanak
         c <- clanak_ids[i,]
+        
         # posalji na obradu
-        komentari_clanka <- Get_all_comments_for_clanak(c$clanak_id)
+        komentari_clanka <- tryCatch({
+            Get_all_comments_for_clanak(c$clanak_id)
+        }, warning = function(warning_condition) {
+            # warning-handler-code
+        }, error = function(error_condition) {
+            print(error_condition)
+            sink('Get_all_comments_for_all_rasprave_errors.txt', append = TRUE)
+            cat(paste(c$clanak_id, 'vrijeme', Sys.time()))
+            sink()
+        }, finally={
+            # cleanup-code
+        })
+        
         # provjeri sto je vraceno
         if (nrow(komentari_clanka) > 0) {
             komentari_clanka$savjetovanje_id <- c$savjetovanje_id
