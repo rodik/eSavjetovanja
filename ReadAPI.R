@@ -103,16 +103,19 @@ Get_all_comments_for_all_rasprave <- function(clanak_ids) {
         }, error = function(error_condition) {
             print(error_condition)
             sink('Get_all_comments_for_all_rasprave_errors.txt', append = TRUE)
-            cat(paste(c$clanak_id, 'vrijeme', Sys.time()))
+            cat(paste(c$clanak_id, 'vrijeme', Sys.time(),'\n'))
             sink()
         }, finally={
             # cleanup-code
         })
         
         # provjeri sto je vraceno
-        if (nrow(komentari_clanka) > 0) {
+        if (!is.null(komentari_clanka) & is.data.frame(komentari_clanka) & nrow(komentari_clanka) > 0) {
             komentari_clanka$savjetovanje_id <- c$savjetovanje_id
             svi_komentari_tbl <- rbind(svi_komentari_tbl, komentari_clanka)
+        }
+        if (i %% 10 == 0) {
+            print(paste('i =', i))
         }
     }
     # return
