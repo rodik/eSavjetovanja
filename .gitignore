@@ -42,4 +42,4 @@ vignettes/*.pdf
 # eSavjetovanja/analize/jezik/imena-prezimena/names-database.csv
 
 Get_all_comments*
-export/*
+exported data/*

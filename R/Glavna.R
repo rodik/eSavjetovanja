@@ -1,33 +1,32 @@
 
 # glavna
 # start Selenium server
-# startServer() #>java -jar selenium-server-standalone.jar // C:\Users\Administrator\Desktop\RSelenium
+# startServer() #>java -jar selenium-server-standalone.jar 
 # remDr <- remoteDriver(browser = "chrome", port=4444)
-remDr <- remoteDriver(browser = "firefox", port=4444)
-# open browser
-remDr$open()
-# hederi # imao sam ih pri ruci
-remDr$setTimeout(type = "implicit", milliseconds = 5000)
-remDr$setTimeout(type = "page load", milliseconds = 5000)
+# remDr <- remoteDriver(browser = "firefox", port=4444)
+# # open browser
+# remDr$open()
+# # hederi # imao sam ih pri ruci
+# remDr$setTimeout(type = "implicit", milliseconds = 5000)
+# remDr$setTimeout(type = "page load", milliseconds = 5000)
 
 
-
-zatvoreni <- hederi_delta %>% filter(Stanje != "Otvoren")
-
-
-# sveee <- data.frame()
-obrada <- zatvoreni %>% mutate(Scraped = FALSE)
-
-# obrada <- zatvoreni %>% filter(Scraped == FALSE)
-
-obrada <- obradeni2$obrada %>% filter(Scraped == FALSE & !is.na(ID))
-
-obradeni3 <- Orkestracija(obrada)
+source('R/Pomocne funkcije.R', encoding = 'UTF-8')
+source('R/ReadAPI.R', encoding = 'UTF-8')
 
 
-View(obradeni$obrada)
+# skini sve headere
+rasprave_headers <- ProcitajHeadereRasprava()
 
-komentari_MAIN <- rbind(obradeni$komentari, obradeni2$komentari)
+# povuci za clanke svih rasprava
+clanci_rasprava <- ProcitajSveClankeSvihRasprava(rasprave_headers)
+
+# zatvoreni <- rasprave_headers %>% filter(Stanje != "Otvoren")
+
+# povuci sve komentare svih rasprava -- ovo moze potrajati
+komentari_clanaka <- Get_all_comments_for_all_rasprave(clanci_rasprava)
 
 
-# https://esavjetovanja.gov.hr/ECon/MainScreen?entityId=6492
+komentari_clanaka %>% saveRDS('data/komentari.RDS')
+clanci_rasprava %>% saveRDS('data/clanci.RDS')
+rasprave_headers %>% saveRDS('data/headers.RDS')

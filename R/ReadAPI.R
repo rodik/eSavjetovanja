@@ -1,4 +1,4 @@
-# curl ?
+### funkcije za citanje komentara pojedinih clanaka
 
 eSavjetovanja_Get_Comments_from_API <- function(clanak_id, cookie, token, elements_per_request = 100, page_num = 1) {
     response <- POST(
@@ -149,24 +149,3 @@ Get_all_comments_for_all_rasprave <- function(clanak_ids) {
     # return
     svi_komentari_tbl
 }
-
-
-
-
-# next.page <- list.content$`next` # TODO mozda treba i tu nakeljiti token!!
-# total.count <- list.content$`count`
-# 
-# while (!is.null(next.page)) {
-#     raw.result <- GET(next.page, config = login)
-#     
-#     parsed.content <- content(raw.result, as = "text", encoding = 'UTF-8')
-#     list.content <- fromJSON(parsed.content)
-#     
-#     table.content <- rbind(table.content, list.content$results)
-#     next.page <- list.content$`next`
-#     
-#     print(paste("Fetched", nrow(table.content), "of", total.count, "records"))
-# }
-# table.content
-
-

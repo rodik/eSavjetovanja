@@ -1,10 +1,12 @@
 
-hederi_delta <- ProcitajHeadereRasprava()
+## TODO pobrisati ovaj fajl
 
-
-con<-file('headeri.csv',encoding="WINDOWS-1252")
-# KORISTITI WRITE TABLE
-write.table(hederi, file=con, na="NA", sep = ";", row.names = FALSE)
+# hederi_delta <- ProcitajHeadereRasprava()
+# 
+# 
+# con<-file('headeri.csv',encoding="WINDOWS-1252")
+# # KORISTITI WRITE TABLE
+# write.table(hederi, file=con, na="NA", sep = ";", row.names = FALSE)
 
 
 

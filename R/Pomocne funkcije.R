@@ -4,37 +4,9 @@ library(httr)
 library(plyr)
 library(dplyr)
 library(jsonlite)
-library(RSelenium)
+# library(RSelenium)
 
-# pomocne funkcije
-
-# ovo iterira po headerima i skrejpa jednu po jednu raspravu
-Orkestracija <- function(obrada) {
-    tryCatch({
-        citava_rasprava <- data.frame()
-        
-        for(i in 1:nrow(obrada)) { # 
-            
-            h <- obrada[i,]
-            
-            base_url <- "https://esavjetovanja.gov.hr"
-            
-            url <- paste0(base_url, as.character(h$SavjetovanjeURL))
-            
-            
-            
-            citava_rasprava <- rbind(citava_rasprava, ProcitajRaspravuPoClancima(remDr, url, h$ID))
-            
-            obrada[i,"Scraped"] <- TRUE
-        }
-    }, error = function(e) {
-        print(e)
-    })
-    list(
-        komentari = citava_rasprava,
-        obrada = obrada
-    )
-}
+### funkcije za citanje headera rasprava ###
 
 ProcitajTablicuHeadera <- function(stranica){
     # dohvati tablicu
@@ -113,6 +85,8 @@ ProcitajHeadereRasprava <- function() {
     sve_rasprave
 }
 
+### funkcije za citanje clanaka iz rasprava
+
 IzvuciIDeveClanakaRasprave <- function(savjetovanje_url, savjetovanje_id) {
     # povuci html
     rasprava_html <- read_html(savjetovanje_url)
@@ -151,6 +125,38 @@ ProcitajSveClankeSvihRasprava <- function(all_headers) {
 }
 
 
+### funkcije za citanje komentara pojedinih clanaka su u ReadAPI.R (da, znam da nije logicno)
+
+
+### ispod su stare funkcije koje se vise ne koriste nakon odbacivanja RSeleniuma
+
+# ovo iterira po headerima i skrejpa jednu po jednu raspravu
+Orkestracija <- function(obrada) {
+    tryCatch({
+        citava_rasprava <- data.frame()
+        
+        for(i in 1:nrow(obrada)) { # 
+            
+            h <- obrada[i,]
+            
+            base_url <- "https://esavjetovanja.gov.hr"
+            
+            url <- paste0(base_url, as.character(h$SavjetovanjeURL))
+            
+            
+            
+            citava_rasprava <- rbind(citava_rasprava, ProcitajRaspravuPoClancima(remDr, url, h$ID))
+            
+            obrada[i,"Scraped"] <- TRUE
+        }
+    }, error = function(e) {
+        print(e)
+    })
+    list(
+        komentari = citava_rasprava,
+        obrada = obrada
+    )
+}
 
 ProcitajRaspravuPoClancima <- function(remDr, savjetovanje_url, savjetovanje_id) {
     # navigate page
