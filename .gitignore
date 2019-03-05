@@ -39,7 +39,9 @@ vignettes/*.pdf
 *.knit.md
 >>>>>>> 1a2b2c24f7b65bc5b8ec9bef1e504237fb8adace
 
-# eSavjetovanja/analize/jezik/imena-prezimena/names-database.csv
+analize/jezik/udruge/registar_udruga_odd2019.RDS
 
 Get_all_comments*
 exported data/*
+
+*.html
