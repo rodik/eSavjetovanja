@@ -1,8 +1,8 @@
 library(tidyverse)
-library(conflicted)
+# library(conflicted)
 library(here)
 library(magrittr)
-library(wrapr)
+# library(wrapr)
 
 imena <- read_csv(here('analize', 'jezik', 'imena-prezimena',
                        'imena.csv'))
@@ -13,7 +13,7 @@ prezimena <- read_csv(here('analize', 'jezik', 'imena-prezimena',
 udruge <- readRDS(here('analize', 'jezik', 'udruge',
                        'registar_udruga_odd2019.RDS'))
 
-komentari <- readRDS(here('export', 'uzorak_komentara.RDS'))
+komentari <- readRDS(here('export', 'uzorak_komentara_q1.RDS'))
 
 # normaliziranje korisničkih imena
 komentari %<>% mutate_at(., .vars = vars(UserName), .funs = tolower) %>%
@@ -21,8 +21,6 @@ komentari %<>% mutate_at(., .vars = vars(UserName), .funs = tolower) %>%
     mutate_at(., .vars = vars(UserName), .funs = str_replace_all,
     pattern = '[:punct:]', replacement = '') %>%
     mutate_at(., .vars = vars(UserName), .funs = str_squish)
-
-komentari %>% select(UserName)
 
 # normaliziranje imena, prezimena i naziva udruga
 imena %<>% pull(., ime) %>%
@@ -40,7 +38,7 @@ categorize <- function(user) {
     else {
         ime_split <- user %>% str_split(., ' ') %>% pluck(., 1)
         if(all(ime_split %in% imena | ime_split %in% prezimena))
-            return('fizička osoba')
+            return('fizicka osoba')
         else
             return('nepoznato')
     }
@@ -48,3 +46,8 @@ categorize <- function(user) {
 
 komentari$kategorijaKorisnika <- komentari %>% pull(., UserName) %>%
     sapply(., FUN = categorize)
+
+komentari_subset_old <- readRDS('export/uzorak_komentara.RDS')
+# komentari %>% saveRDS('export/uzorak_komentara.RDS')
+
+komentari %>% rbind(komentari_subset_old) %>% saveRDS('export/uzorak_komentara.RDS')

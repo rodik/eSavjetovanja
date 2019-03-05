@@ -33,7 +33,7 @@ eSavjetovanja_Get_Comments_from_API <- function(clanak_id, cookie, token, elemen
     table.content <- list.content$Comments 
     
     if (is.data.frame(table.content)) {
-        table.content <- table.content %>% flatten()
+        table.content <- table.content %>% jsonlite::flatten()
         
         # ako je komentar bez odgovora, onda manualno dodaj kolone koje bi postojale da odgovora ima
         if (!'Response.ResponseId' %in% colnames(table.content)) {
@@ -44,6 +44,10 @@ eSavjetovanja_Get_Comments_from_API <- function(clanak_id, cookie, token, elemen
         }
         # makni nestanu kolonu ako postoji
         table.content$Response <- NULL
+        
+        if ('CanDelete' %in% colnames(table.content)) {
+            table.content$CanDelete <- NULL
+        }
     }
     
     # return
@@ -72,10 +76,10 @@ Get_all_comments_for_clanak <- function(clanak_id){
             page_num = i
         )
         # odmori
-        Sys.sleep(0.1)
         # ako ima rezultata dodaj u globalnu kolekciju
         if (nrow(comments_batch$comments) > 0) {
             all_comments_tbl <- rbind(all_comments_tbl, comments_batch$comments)
+            Sys.sleep(1)
         }
         # ako je ukupan broj komentara veci od prikupljenog, odi u iducu iteraciju
         if (nrow(all_comments_tbl) < comments_batch$total_comments) {
@@ -126,15 +130,15 @@ Get_all_comments_for_all_rasprave <- function(clanak_ids) {
             sink('Get_all_comments_for_all_rasprave_errors.txt', append = TRUE)
             cat(paste(c$clanak_id, 'vrijeme', Sys.time(),'\n'))
             sink()
+            Sys.sleep(3)
             NULL
         }, finally={
             # message('All done, quitting.')
         })
         
-        # print(class(komentari_clanka))
-        
         # provjeri sto je vraceno
         if (!is.null(komentari_clanka) && is.data.frame(komentari_clanka) && nrow(komentari_clanka) > 0) {
+            komentari_clanka$clanak_id <- c$clanak_id
             komentari_clanka$savjetovanje_id <- c$savjetovanje_id
             svi_komentari_tbl <- rbind(svi_komentari_tbl, komentari_clanka)
         }
